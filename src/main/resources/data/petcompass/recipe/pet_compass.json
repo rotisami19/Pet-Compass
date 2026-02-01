@@ -1,0 +1,32 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "BGb",
+        "GCG",
+        "FGf"
+    ],
+    "key": {
+        "B": {
+            "item": "minecraft:bone"
+        },
+        "b": {
+            "item": "minecraft:bone"
+        },
+        "G": {
+            "item": "minecraft:gold_ingot"
+        },
+        "C": {
+            "item": "minecraft:compass"
+        },
+        "F": {
+            "tag": "c:foods/raw_fish"
+        },
+        "f": {
+            "tag": "c:foods/raw_fish"
+        }
+    },
+    "result": {
+        "id": "petcompass:pet_compass",
+        "count": 1
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "item.petcompass.pet_compass": "Pet Compass",
+    "gui.petcompass.title": "Pet Compass - Select a Pet",
+    "gui.petcompass.search": "Search...",
+    "gui.petcompass.track": "Track",
+    "gui.petcompass.no_pets": "No pets found nearby",
+    "chat.petcompass.reset": "Compass reset",
+    "chat.petcompass.tracking": "Now tracking: %s",
+    "chat.petcompass.not_found": "Pet not found in range",
+    "tooltip.petcompass.tracking": "Tracking: %s",
+    "tooltip.petcompass.distance": "Distance: %d blocks",
+    "tooltip.petcompass.dimension": "Dimension: %s",
+    "tooltip.petcompass.searching": "Searching...",
+    "tooltip.petcompass.not_found": "Pet not found",
+    "tooltip.petcompass.inactive": "Right-click to select a pet",
+    "hud.petcompass.tracking": "§a§lTracking Pet",
+    "hud.petcompass.distance": "Distance: %s",
+    "hud.petcompass.dimension": "Dimension: %s",
+    "advancement.petcompass.craft_compass.title": "Pet Compass",
+    "advancement.petcompass.craft_compass.description": "Craft or obtain a Pet Compass",
+    "advancement.petcompass.find_lost_pet.title": "Where Is My Pet?",
+    "advancement.petcompass.find_lost_pet.description": "Find a lost pet that was over 100 blocks away"
+}

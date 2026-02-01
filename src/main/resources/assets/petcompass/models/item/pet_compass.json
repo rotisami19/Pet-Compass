@@ -1,0 +1,42 @@
+{
+	"format_version": "1.21.11",
+	"credit": "Made with Blockbench",
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "petcompass:item/pet_compass_00"
+	},
+	"overrides": [
+		{"predicate": {"angle": 0}, "model": "petcompass:item/pet_compass_00"},
+		{"predicate": {"angle": 0.01563}, "model": "petcompass:item/pet_compass_01"},
+		{"predicate": {"angle": 0.04688}, "model": "petcompass:item/pet_compass_02"},
+		{"predicate": {"angle": 0.07813}, "model": "petcompass:item/pet_compass_03"},
+		{"predicate": {"angle": 0.10938}, "model": "petcompass:item/pet_compass_04"},
+		{"predicate": {"angle": 0.14063}, "model": "petcompass:item/pet_compass_05"},
+		{"predicate": {"angle": 0.17188}, "model": "petcompass:item/pet_compass_06"},
+		{"predicate": {"angle": 0.20313}, "model": "petcompass:item/pet_compass_07"},
+		{"predicate": {"angle": 0.23438}, "model": "petcompass:item/pet_compass_08"},
+		{"predicate": {"angle": 0.26563}, "model": "petcompass:item/pet_compass_09"},
+		{"predicate": {"angle": 0.29688}, "model": "petcompass:item/pet_compass_10"},
+		{"predicate": {"angle": 0.32813}, "model": "petcompass:item/pet_compass_11"},
+		{"predicate": {"angle": 0.35938}, "model": "petcompass:item/pet_compass_12"},
+		{"predicate": {"angle": 0.39063}, "model": "petcompass:item/pet_compass_13"},
+		{"predicate": {"angle": 0.42188}, "model": "petcompass:item/pet_compass_14"},
+		{"predicate": {"angle": 0.45313}, "model": "petcompass:item/pet_compass_15"},
+		{"predicate": {"angle": 0.48438}, "model": "petcompass:item/pet_compass_16"},
+		{"predicate": {"angle": 0.51563}, "model": "petcompass:item/pet_compass_17"},
+		{"predicate": {"angle": 0.54688}, "model": "petcompass:item/pet_compass_18"},
+		{"predicate": {"angle": 0.57813}, "model": "petcompass:item/pet_compass_19"},
+		{"predicate": {"angle": 0.60938}, "model": "petcompass:item/pet_compass_20"},
+		{"predicate": {"angle": 0.64063}, "model": "petcompass:item/pet_compass_21"},
+		{"predicate": {"angle": 0.67188}, "model": "petcompass:item/pet_compass_22"},
+		{"predicate": {"angle": 0.70313}, "model": "petcompass:item/pet_compass_23"},
+		{"predicate": {"angle": 0.73438}, "model": "petcompass:item/pet_compass_24"},
+		{"predicate": {"angle": 0.76563}, "model": "petcompass:item/pet_compass_25"},
+		{"predicate": {"angle": 0.79688}, "model": "petcompass:item/pet_compass_26"},
+		{"predicate": {"angle": 0.82813}, "model": "petcompass:item/pet_compass_27"},
+		{"predicate": {"angle": 0.85938}, "model": "petcompass:item/pet_compass_28"},
+		{"predicate": {"angle": 0.89063}, "model": "petcompass:item/pet_compass_29"},
+		{"predicate": {"angle": 0.92188}, "model": "petcompass:item/pet_compass_30"},
+		{"predicate": {"angle": 0.95313}, "model": "petcompass:item/pet_compass_31"}
+	]
+}

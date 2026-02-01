@@ -1,0 +1,12 @@
+{
+    "required": true,
+    "package": "com.petcompass.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "refmap": "petcompass.refmap.json",
+    "client": [
+        "EntityMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

@@ -1,0 +1,35 @@
+{
+    "parent": "minecraft:recipes/root",
+    "display": {
+        "icon": {
+            "id": "petcompass:pet_compass"
+        },
+        "title": {
+            "translate": "advancement.petcompass.craft_compass.title"
+        },
+        "description": {
+            "translate": "advancement.petcompass.craft_compass.description"
+        },
+        "frame": "task",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "criteria": {
+        "has_compass": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "items": "petcompass:pet_compass"
+                    }
+                ]
+            }
+        }
+    },
+    "requirements": [
+        [
+            "has_compass"
+        ]
+    ]
+}

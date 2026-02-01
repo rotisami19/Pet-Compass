@@ -1,0 +1,23 @@
+{
+    "item.petcompass.pet_compass": "Boussole à Animaux",
+    "gui.petcompass.title": "Boussole à Animaux - Sélectionner",
+    "gui.petcompass.search": "Rechercher...",
+    "gui.petcompass.track": "Suivre",
+    "gui.petcompass.no_pets": "Aucun animal trouvé",
+    "chat.petcompass.reset": "Boussole réinitialisée",
+    "chat.petcompass.tracking": "Suivi de : %s",
+    "chat.petcompass.not_found": "Animal introuvable",
+    "tooltip.petcompass.tracking": "Suivi : %s",
+    "tooltip.petcompass.distance": "Distance : %d blocs",
+    "tooltip.petcompass.dimension": "Dimension : %s",
+    "tooltip.petcompass.searching": "Recherche en cours...",
+    "tooltip.petcompass.not_found": "Animal introuvable",
+    "tooltip.petcompass.inactive": "Clic droit pour sélectionner",
+    "hud.petcompass.tracking": "§a§lSuivi en cours",
+    "hud.petcompass.distance": "Distance : %s",
+    "hud.petcompass.dimension": "Dimension : %s",
+    "advancement.petcompass.craft_compass.title": "Boussole à Animaux",
+    "advancement.petcompass.craft_compass.description": "Fabriquer ou obtenir une Boussole à Animaux",
+    "advancement.petcompass.find_lost_pet.title": "Où Est Mon Animal ?",
+    "advancement.petcompass.find_lost_pet.description": "Retrouver un animal perdu à plus de 100 blocs"
+}
