@@ -50,5 +50,12 @@ public class PetCompassNetworking {
             UpdateCompassPacket.STREAM_CODEC,
             UpdateCompassPacket::handle
         );
+
+        // Server -> Client: Sync scanned pets from region files
+        registrar.playToClient(
+            SyncScannedPetsPacket.TYPE,
+            SyncScannedPetsPacket.STREAM_CODEC,
+            SyncScannedPetsPacket::handle
+        );
     }
 }

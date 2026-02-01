@@ -1,5 +1,10 @@
 package com.petcompass;
 
+import com.petcompass.util.RegionScanner.ScannedPetInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Client-side data storage for compass HUD display.
  */
@@ -13,6 +18,9 @@ public class PetCompassClientData {
     public static boolean isTracking = false;
     public static String dimension = "minecraft:overworld";
     
+    // Scanned pets from region files (includes pets in unloaded chunks)
+    private static List<ScannedPetInfo> scannedPets = new ArrayList<>();
+    
     public static void reset() {
         petUUID = "";
         petName = "";
@@ -23,4 +31,17 @@ public class PetCompassClientData {
         isTracking = false;
         dimension = "minecraft:overworld";
     }
+    
+    public static void setScannedPets(List<ScannedPetInfo> pets) {
+        scannedPets = new ArrayList<>(pets);
+    }
+    
+    public static List<ScannedPetInfo> getScannedPets() {
+        return scannedPets;
+    }
+    
+    public static void clearScannedPets() {
+        scannedPets.clear();
+    }
 }
+

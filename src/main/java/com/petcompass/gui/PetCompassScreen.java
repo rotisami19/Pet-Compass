@@ -55,7 +55,15 @@ public class PetCompassScreen extends Screen {
         // Track button
         this.trackButton = Button.builder(Component.translatable("gui.petcompass.track"), button -> {
             if (selectedPet != null) {
-                PacketDistributor.sendToServer(new SelectPetPacket(selectedPet.uuid()));
+                // Send all pet data so we can track even unloaded pets
+                PacketDistributor.sendToServer(new SelectPetPacket(
+                    selectedPet.uuid(),
+                    selectedPet.name(),
+                    selectedPet.x(),
+                    selectedPet.y(),
+                    selectedPet.z(),
+                    selectedPet.dimension()
+                ));
                 this.onClose();
             }
         }).bounds(this.width / 2 - 155, this.height - 52, 150, 20).build();
@@ -160,18 +168,47 @@ public class PetCompassScreen extends Screen {
             String typeKey = pet.entityType();
             Component typeName = Component.translatable(typeKey);
             String typeString = typeName.getString();
+            int yOffset = 14;
             if (!typeString.equals(pet.name())) {
-                guiGraphics.drawString(font, typeName, left + 5, top + 14, 0xAAAAAA);
+                guiGraphics.drawString(font, typeName, left + 5, top + yOffset, 0xAAAAAA);
+                yOffset += 10;
             }
             
-            // Distance/coords
-            String coords = String.format("X: %d, Y: %d, Z: %d", pet.x(), pet.y(), pet.z());
-            guiGraphics.drawString(font, coords, left + 5, top + 14 + (typeString.equals(pet.name()) ? 0 : 12), 0x888888);
+            // Dimension indicator with color coding
+            String dimDisplay = formatDimension(pet.dimension());
+            int dimColor = getDimensionColor(pet.dimension());
+            guiGraphics.drawString(font, dimDisplay, left + 5, top + yOffset, dimColor);
+            
+            // Distance/coords on the right side
+            String coords = String.format("X: %d, Z: %d", pet.x(), pet.z());
+            int coordsWidth = font.width(coords);
+            guiGraphics.drawString(font, coords, left + width - coordsWidth - 5, top + 2, 0x888888);
             
             // Highlight if selected
             if (selectedPet != null && selectedPet.uuid().equals(pet.uuid())) {
                 guiGraphics.fill(left, top, left + width, top + height, 0x33FFFFFF);
             }
+        }
+        
+        private String formatDimension(String dim) {
+            if (dim == null) return "?";
+            if (dim.contains("overworld")) return "Overworld";
+            if (dim.contains("nether")) return "Nether";
+            if (dim.contains("end")) return "The End";
+            // For modded dimensions, extract the name
+            if (dim.contains(":")) {
+                String name = dim.substring(dim.indexOf(':') + 1);
+                return name.substring(0, 1).toUpperCase() + name.substring(1).replace('_', ' ');
+            }
+            return dim;
+        }
+        
+        private int getDimensionColor(String dim) {
+            if (dim == null) return 0x888888;
+            if (dim.contains("overworld")) return 0x55FF55; // Green
+            if (dim.contains("nether")) return 0xFF5555;    // Red
+            if (dim.contains("end")) return 0xAA55AA;       // Purple
+            return 0x55FFFF; // Cyan for modded dimensions
         }
 
         @Override

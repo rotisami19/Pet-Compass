@@ -36,8 +36,9 @@ public class ServerAchievementHandler {
         if (player.tickCount % CHECK_INTERVAL != 0) return;
 
         // Skip if player already has the achievement (performance optimization)
-        if (player.getAdvancements().getOrStartProgress(
-                player.server.getAdvancements().get(FIND_LOST_PET_ADVANCEMENT)).isDone()) {
+        var advancementHolder = player.server.getAdvancements().get(FIND_LOST_PET_ADVANCEMENT);
+        if (advancementHolder != null && 
+            player.getAdvancements().getOrStartProgress(advancementHolder).isDone()) {
             return;
         }
 

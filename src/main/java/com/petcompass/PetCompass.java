@@ -15,6 +15,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 @Mod(PetCompass.MODID)
 public class PetCompass {
     public static final String MODID = "petcompass";
+    public static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MODID);
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
     
