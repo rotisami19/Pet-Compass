@@ -1,4 +1,8 @@
-# Pet Compass Mod
+<div align="center">
+  <img src="pet_compass.png" alt="Pet Compass Logo" width="200" height="200">
+
+  # Pet Compass
+</div>
 
 A simple NeoForge 1.21.1 mod that adds a **Pet Compass** to help you find your lost companions.
 
