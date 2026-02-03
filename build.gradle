@@ -4,6 +4,7 @@ plugins {
     id 'idea'
     id 'maven-publish'
     id 'net.neoforged.gradle.userdev' version '7.1.20'
+    id 'net.darkhax.curseforgegradle' version '1.1.25'
 }
 
 version = "${mod_version}"
@@ -66,4 +67,28 @@ runs {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// ============================================
+// CurseForge Upload Configuration
+// ============================================
+// To upload: ./gradlew curseforge
+// Requires: CURSEFORGE_API_KEY environment variable
+// Get your API key from: https://authors.curseforge.com/account/api-tokens
+// ============================================
+
+task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    // Get API key from environment variable (never commit the key!)
+    apiToken = System.getenv('CURSEFORGE_API_KEY') ?: 'missing_api_key'
+    
+    // Your CurseForge project ID (get it from your project URL)
+    // Example: https://www.curseforge.com/minecraft/mc-mods/pet-compass -> Project ID shown in "About Project"
+    def projectId = System.getenv('CURSEFORGE_PROJECT_ID') ?: '0'
+    
+    def mainFile = upload(projectId, jar)
+    mainFile.changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : "Version ${mod_version}"
+    mainFile.changelogType = 'markdown'
+    mainFile.releaseType = 'release' // 'alpha', 'beta', or 'release'
+    mainFile.addGameVersion '1.21.1'
+    mainFile.addModLoader 'NeoForge'
 }
