@@ -2,72 +2,75 @@ package com.petcompass.network;
 
 import com.petcompass.PetCompassClientData;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
 
 /**
  * Packet sent from server to client to update compass display data.
  */
-public record UpdateCompassPacket(
-    String petUUID,
-    String petName,
-    int targetX,
-    int targetY,
-    int targetZ,
-    int distance,
-    boolean found,
-    String dimension
-) implements CustomPacketPayload {
+public class UpdateCompassPacket {
 
-    public static final CustomPacketPayload.Type<UpdateCompassPacket> TYPE = 
-        new CustomPacketPayload.Type<>(PetCompassNetworking.UPDATE_COMPASS_ID);
+    private final String petUUID;
+    private final String petName;
+    private final int targetX;
+    private final int targetY;
+    private final int targetZ;
+    private final int distance;
+    private final boolean found;
+    private final String dimension;
 
-    public static final StreamCodec<FriendlyByteBuf, UpdateCompassPacket> STREAM_CODEC = 
-        new StreamCodec<>() {
-            @Override
-            public UpdateCompassPacket decode(FriendlyByteBuf buf) {
-                return new UpdateCompassPacket(
-                    buf.readUtf(),
-                    buf.readUtf(),
-                    buf.readInt(),
-                    buf.readInt(),
-                    buf.readInt(),
-                    buf.readInt(),
-                    buf.readBoolean(),
-                    buf.readUtf()
-                );
-            }
-
-            @Override
-            public void encode(FriendlyByteBuf buf, UpdateCompassPacket packet) {
-                buf.writeUtf(packet.petUUID);
-                buf.writeUtf(packet.petName);
-                buf.writeInt(packet.targetX);
-                buf.writeInt(packet.targetY);
-                buf.writeInt(packet.targetZ);
-                buf.writeInt(packet.distance);
-                buf.writeBoolean(packet.found);
-                buf.writeUtf(packet.dimension);
-            }
-        };
-
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public UpdateCompassPacket(String petUUID, String petName, int targetX, int targetY, int targetZ, int distance, boolean found, String dimension) {
+        this.petUUID = petUUID;
+        this.petName = petName;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.targetZ = targetZ;
+        this.distance = distance;
+        this.found = found;
+        this.dimension = dimension;
     }
 
-    public static void handle(UpdateCompassPacket packet, IPayloadContext context) {
-        context.enqueueWork(() -> {
+    public static void encode(UpdateCompassPacket packet, FriendlyByteBuf buf) {
+        buf.writeUtf(packet.petUUID);
+        buf.writeUtf(packet.petName);
+        buf.writeInt(packet.targetX);
+        buf.writeInt(packet.targetY);
+        buf.writeInt(packet.targetZ);
+        buf.writeInt(packet.distance);
+        buf.writeBoolean(packet.found);
+        buf.writeUtf(packet.dimension);
+    }
+
+    public static UpdateCompassPacket decode(FriendlyByteBuf buf) {
+        return new UpdateCompassPacket(
+            buf.readUtf(),
+            buf.readUtf(),
+            buf.readInt(),
+            buf.readInt(),
+            buf.readInt(),
+            buf.readInt(),
+            buf.readBoolean(),
+            buf.readUtf()
+        );
+    }
+
+    public static void handle(UpdateCompassPacket packet, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
             // Update client-side data for HUD rendering
-            PetCompassClientData.petUUID = packet.petUUID;
-            PetCompassClientData.petName = packet.petName;
-            PetCompassClientData.targetX = packet.targetX;
-            PetCompassClientData.targetY = packet.targetY;
-            PetCompassClientData.targetZ = packet.targetZ;
-            PetCompassClientData.distance = packet.distance;
-            PetCompassClientData.isTracking = packet.found;
-            PetCompassClientData.dimension = packet.dimension;
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                PetCompassClientData.petUUID = packet.petUUID;
+                PetCompassClientData.petName = packet.petName;
+                PetCompassClientData.targetX = packet.targetX;
+                PetCompassClientData.targetY = packet.targetY;
+                PetCompassClientData.targetZ = packet.targetZ;
+                PetCompassClientData.distance = packet.distance;
+                PetCompassClientData.isTracking = packet.found;
+                PetCompassClientData.dimension = packet.dimension;
+            });
         });
+        ctx.get().setPacketHandled(true);
     }
 }

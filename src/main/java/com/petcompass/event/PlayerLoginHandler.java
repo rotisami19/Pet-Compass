@@ -1,20 +1,21 @@
 package com.petcompass.event;
 
 import com.petcompass.PetCompass;
+import com.petcompass.network.PetCompassNetworking;
 import com.petcompass.network.SyncScannedPetsPacket;
 import com.petcompass.util.RegionScanner;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
 /**
  * Handles scanning for pets when a player logs in.
  * This triggers a background scan of region files to find pets in unloaded chunks.
  */
-@EventBusSubscriber(modid = PetCompass.MODID)
+@Mod.EventBusSubscriber(modid = PetCompass.MODID)
 public class PlayerLoginHandler {
 
     @SubscribeEvent
@@ -35,7 +36,10 @@ public class PlayerLoginHandler {
                     // This needs to be done on the main thread
                     level.getServer().execute(() -> {
                         if (player.isAlive() && player.connection != null) {
-                            PacketDistributor.sendToPlayer(player, new SyncScannedPetsPacket(pets));
+                            PetCompassNetworking.CHANNEL.send(
+                                PacketDistributor.PLAYER.with(() -> player),
+                                new SyncScannedPetsPacket(pets)
+                            );
                         }
                     });
                 }

@@ -1,22 +1,20 @@
 package com.petcompass.gui;
 
-import com.petcompass.PetCompass;
 import com.petcompass.PetCompassClientData;
 import com.petcompass.PetCompassItem;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 /**
  * HUD overlay that shows pet tracking information when holding the compass.
  */
-public class PetCompassHUD implements LayeredDraw.Layer {
+public class PetCompassHUD implements IGuiOverlay {
 
     // Distance threshold to show "nearby" indicator
     private static final int NEARBY_DISTANCE = 32;
@@ -27,7 +25,7 @@ public class PetCompassHUD implements LayeredDraw.Layer {
     private boolean blinkState = true;
 
     @Override
-    public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         
@@ -124,15 +122,14 @@ public class PetCompassHUD implements LayeredDraw.Layer {
         
         // Draw paw icon when nearby
         if (isNearby) {
-            drawPawIcon(guiGraphics, x + panelWidth - 20, y + 5, isVeryClose, blinkState);
+            drawPawIcon(guiGraphics, mc, x + panelWidth - 20, y + 5, isVeryClose, blinkState);
         }
     }
     
     /**
      * Draw a simple paw icon using Unicode characters
      */
-    private void drawPawIcon(GuiGraphics guiGraphics, int x, int y, boolean isVeryClose, boolean blink) {
-        Minecraft mc = Minecraft.getInstance();
+    private void drawPawIcon(GuiGraphics guiGraphics, Minecraft mc, int x, int y, boolean isVeryClose, boolean blink) {
         int color;
         
         if (isVeryClose) {

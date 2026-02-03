@@ -1,12 +1,14 @@
 package com.petcompass;
 
 import java.util.UUID;
+import java.util.List;
 
 import com.petcompass.gui.PetCompassScreen;
 import com.petcompass.network.PetCompassNetworking;
 import com.petcompass.network.RequestPetsPacket;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -15,11 +17,22 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
-import java.util.List;
+import javax.annotation.Nullable;
 
 public class PetCompassItem extends Item {
+
+    // NBT Keys
+    public static final String KEY_STATE = "CompassState";
+    public static final String KEY_PET_UUID = "PetUUID";
+    public static final String KEY_PET_NAME = "PetName";
+    public static final String KEY_TARGET_X = "TargetX";
+    public static final String KEY_TARGET_Y = "TargetY";
+    public static final String KEY_TARGET_Z = "TargetZ";
+    public static final String KEY_DIMENSION = "TargetDimension";
+    public static final String KEY_DISTANCE = "Distance";
+    public static final String KEY_INITIAL_DISTANCE = "InitialDistance";
 
     public PetCompassItem(Properties properties) {
         super(properties);
@@ -35,23 +48,22 @@ public class PetCompassItem extends Item {
             if (level.isClientSide) {
                 // Also stop client-side tracking immediately (HUD/needle/outline)
                 PetCompassClientData.reset();
-            }
-            if (!level.isClientSide) {
+            } else {
                 player.displayClientMessage(Component.translatable("chat.petcompass.reset"), true);
             }
         } else {
             // Right click: open GUI
             if (level.isClientSide) {
                 // Request pet list from server and open GUI
-                PacketDistributor.sendToServer(new RequestPetsPacket());
+                PetCompassNetworking.CHANNEL.send(PacketDistributor.SERVER.noArg(), new RequestPetsPacket());
             }
         }
         
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         CompassState state = getState(stack);
         if (state == CompassState.FOUND) {
             String petName = getPetName(stack);
@@ -68,7 +80,7 @@ public class PetCompassItem extends Item {
         } else {
             tooltipComponents.add(Component.translatable("tooltip.petcompass.inactive"));
         }
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        super.appendHoverText(stack, level, tooltipComponents, tooltipFlag);
     }
 
     @Override
@@ -76,41 +88,49 @@ public class PetCompassItem extends Item {
         return getState(stack) == CompassState.FOUND;
     }
 
-    // ========== State Management ==========
+    // ========== State Management (NBT) ==========
     
     public static CompassState getState(ItemStack stack) {
-        if (stack.has(PetCompassComponents.COMPASS_STATE)) {
-            return CompassState.fromId(stack.get(PetCompassComponents.COMPASS_STATE));
+        CompoundTag tag = stack.getTag();
+        if (tag != null && tag.contains(KEY_STATE)) {
+            return CompassState.fromId(tag.getInt(KEY_STATE));
         }
         return CompassState.INACTIVE;
     }
     
     public static void setState(ItemStack stack, CompassState state) {
-        stack.set(PetCompassComponents.COMPASS_STATE, state.getId());
+        stack.getOrCreateTag().putInt(KEY_STATE, state.getId());
     }
     
     public static void setTarget(ItemStack stack, UUID petUUID, String petName, int x, int y, int z, String dimension) {
-        stack.set(PetCompassComponents.COMPASS_STATE, CompassState.FOUND.getId());
-        stack.set(PetCompassComponents.PET_UUID, petUUID.toString());
-        stack.set(PetCompassComponents.PET_NAME, petName);
-        stack.set(PetCompassComponents.TARGET_X, x);
-        stack.set(PetCompassComponents.TARGET_Y, y);
-        stack.set(PetCompassComponents.TARGET_Z, z);
-        stack.set(PetCompassComponents.DIMENSION, dimension);
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putInt(KEY_STATE, CompassState.FOUND.getId());
+        tag.putString(KEY_PET_UUID, petUUID.toString());
+        tag.putString(KEY_PET_NAME, petName);
+        tag.putInt(KEY_TARGET_X, x);
+        tag.putInt(KEY_TARGET_Y, y);
+        tag.putInt(KEY_TARGET_Z, z);
+        tag.putString(KEY_DIMENSION, dimension);
     }
     
     public static void clearTarget(ItemStack stack) {
-        stack.remove(PetCompassComponents.COMPASS_STATE);
-        stack.remove(PetCompassComponents.PET_UUID);
-        stack.remove(PetCompassComponents.PET_NAME);
-        stack.remove(PetCompassComponents.TARGET_X);
-        stack.remove(PetCompassComponents.TARGET_Y);
-        stack.remove(PetCompassComponents.TARGET_Z);
-        stack.remove(PetCompassComponents.DIMENSION);
+        CompoundTag tag = stack.getTag();
+        if (tag != null) {
+            tag.remove(KEY_STATE);
+            tag.remove(KEY_PET_UUID);
+            tag.remove(KEY_PET_NAME);
+            tag.remove(KEY_TARGET_X);
+            tag.remove(KEY_TARGET_Y);
+            tag.remove(KEY_TARGET_Z);
+            tag.remove(KEY_DIMENSION);
+            tag.remove(KEY_DISTANCE);
+            tag.remove(KEY_INITIAL_DISTANCE);
+        }
     }
 
     public static String getDimension(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.DIMENSION, "minecraft:overworld");
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_DIMENSION)) ? tag.getString(KEY_DIMENSION) : "minecraft:overworld";
     }
 
     public static String getDimensionDisplayName(String dimensionId) {
@@ -130,38 +150,45 @@ public class PetCompassItem extends Item {
     }
     
     public static String getPetUUID(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.PET_UUID, "");
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_PET_UUID)) ? tag.getString(KEY_PET_UUID) : "";
     }
     
     public static String getPetName(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.PET_NAME, "Unknown");
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_PET_NAME)) ? tag.getString(KEY_PET_NAME) : "Unknown";
     }
     
     public static int getTargetX(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.TARGET_X, 0);
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_TARGET_X)) ? tag.getInt(KEY_TARGET_X) : 0;
     }
     
     public static int getTargetY(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.TARGET_Y, 0);
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_TARGET_Y)) ? tag.getInt(KEY_TARGET_Y) : 0;
     }
     
     public static int getTargetZ(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.TARGET_Z, 0);
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_TARGET_Z)) ? tag.getInt(KEY_TARGET_Z) : 0;
     }
 
     public static int getDistance(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.DISTANCE, 0);
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_DISTANCE)) ? tag.getInt(KEY_DISTANCE) : 0;
     }
 
     public static void setDistance(ItemStack stack, int distance) {
-        stack.set(PetCompassComponents.DISTANCE, distance);
+        stack.getOrCreateTag().putInt(KEY_DISTANCE, distance);
     }
 
     public static int getInitialDistance(ItemStack stack) {
-        return stack.getOrDefault(PetCompassComponents.INITIAL_DISTANCE, 0);
+        CompoundTag tag = stack.getTag();
+        return (tag != null && tag.contains(KEY_INITIAL_DISTANCE)) ? tag.getInt(KEY_INITIAL_DISTANCE) : 0;
     }
 
     public static void setInitialDistance(ItemStack stack, int distance) {
-        stack.set(PetCompassComponents.INITIAL_DISTANCE, distance);
+        stack.getOrCreateTag().putInt(KEY_INITIAL_DISTANCE, distance);
     }
 }
