@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.0 (Forge 1.20.x)
+- **Ported to Forge 1.20.x**: The mod is now compatible with Minecraft 1.20.1 and Forge.
+- **Unloaded Pets Support**: Region scanner now works to find pets in unloaded chunks.
+- **Full Feature Parity**: All features from v1.1.0 are included.
+
 ## v1.1.0 - Unloaded Pets & Cross-Dimension Support
 - **Region Scanner**: Can now find pets in unloaded chunks by scanning world files
 - **Cross-Dimension Tracking**: Track pets even if they're in the Nether, End, or modded dimensions

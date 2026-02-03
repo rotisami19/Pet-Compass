@@ -10,9 +10,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.UUID;
 
@@ -20,23 +20,26 @@ import java.util.UUID;
  * Server-side event handler for achievement triggers.
  * Checks if player has reached their tracked pet and awards the achievement.
  */
-@EventBusSubscriber(modid = PetCompass.MODID)
+@Mod.EventBusSubscriber(modid = PetCompass.MODID)
 public class ServerAchievementHandler {
 
     private static final int PROXIMITY_THRESHOLD = 10; // Blocks - how close to be considered "found"
     private static final int CHECK_INTERVAL = 20; // Check every 20 ticks (1 second)
     private static final ResourceLocation FIND_LOST_PET_ADVANCEMENT = 
-        ResourceLocation.fromNamespaceAndPath(PetCompass.MODID, "find_lost_pet");
+        new ResourceLocation(PetCompass.MODID, "find_lost_pet");
 
     @SubscribeEvent
-    public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        // Run only at end of tick and on server side
+        if (event.phase != TickEvent.Phase.END || event.side.isClient()) return;
+        
+        if (!(event.player instanceof ServerPlayer player)) return;
         
         // Only check every second to reduce performance impact
         if (player.tickCount % CHECK_INTERVAL != 0) return;
 
         // Skip if player already has the achievement (performance optimization)
-        var advancementHolder = player.server.getAdvancements().get(FIND_LOST_PET_ADVANCEMENT);
+        var advancementHolder = player.server.getAdvancements().getAdvancement(FIND_LOST_PET_ADVANCEMENT);
         if (advancementHolder != null && 
             player.getAdvancements().getOrStartProgress(advancementHolder).isDone()) {
             return;
@@ -68,7 +71,7 @@ public class ServerAchievementHandler {
             double currentDistance = player.distanceTo(pet);
             if (currentDistance <= PROXIMITY_THRESHOLD) {
                 // Player found their lost pet! Award the achievement
-                PetCompassTriggers.FIND_LOST_PET.get().trigger(player, initialDistance);
+                PetCompassTriggers.FIND_LOST_PET.trigger(player, initialDistance);
                 
                 // Reset initial distance to prevent re-triggering
                 PetCompassItem.setInitialDistance(compass, 0);

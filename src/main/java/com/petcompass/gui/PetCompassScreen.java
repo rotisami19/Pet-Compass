@@ -1,5 +1,6 @@
 package com.petcompass.gui;
 
+import com.petcompass.network.PetCompassNetworking;
 import com.petcompass.network.SelectPetPacket;
 import com.petcompass.util.PetUtils;
 import net.minecraft.client.Minecraft;
@@ -9,7 +10,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,8 @@ public class PetCompassScreen extends Screen {
         // Pet list in the middle
         int listTop = 50;
         int listBottom = this.height - 64;
-        this.petList = new PetSelectionList(this.minecraft, this.width, listBottom - listTop, listTop, 36);
+        int listHeight = listBottom - listTop;
+        this.petList = new PetSelectionList(this.minecraft, this.width, listHeight, listTop, 36);
         this.addWidget(this.petList);
         refreshList();
         
@@ -56,7 +58,7 @@ public class PetCompassScreen extends Screen {
         this.trackButton = Button.builder(Component.translatable("gui.petcompass.track"), button -> {
             if (selectedPet != null) {
                 // Send all pet data so we can track even unloaded pets
-                PacketDistributor.sendToServer(new SelectPetPacket(
+                PetCompassNetworking.CHANNEL.send(PacketDistributor.SERVER.noArg(), new SelectPetPacket(
                     selectedPet.uuid(),
                     selectedPet.name(),
                     selectedPet.x(),
@@ -138,7 +140,8 @@ public class PetCompassScreen extends Screen {
 
     class PetSelectionList extends ObjectSelectionList<PetEntry> {
         public PetSelectionList(Minecraft minecraft, int width, int height, int top, int itemHeight) {
-            super(minecraft, width, height, top, itemHeight);
+            // 1.20.1 signature: Minecraft, width, height, top, bottom, itemHeight
+            super(minecraft, width, height, top, top + height, itemHeight);
         }
 
         @Override

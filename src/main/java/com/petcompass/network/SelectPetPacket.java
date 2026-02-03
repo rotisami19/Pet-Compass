@@ -1,69 +1,63 @@
 package com.petcompass.network;
 
-import com.petcompass.PetCompass;
 import com.petcompass.PetCompassItem;
 import com.petcompass.util.PetUtils;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * Packet sent from client to server when a pet is selected in the GUI.
- * Now includes all pet data so we can track pets in unloaded chunks.
  */
-public record SelectPetPacket(
-    UUID petUUID,
-    String petName,
-    int x,
-    int y,
-    int z,
-    String dimension
-) implements CustomPacketPayload {
+public class SelectPetPacket {
 
-    public static final CustomPacketPayload.Type<SelectPetPacket> TYPE = 
-        new CustomPacketPayload.Type<>(PetCompassNetworking.SELECT_PET_ID);
+    private final UUID petUUID;
+    private final String petName;
+    private final int x;
+    private final int y;
+    private final int z;
+    private final String dimension;
 
-    public static final StreamCodec<FriendlyByteBuf, SelectPetPacket> STREAM_CODEC = 
-        new StreamCodec<>() {
-            @Override
-            public SelectPetPacket decode(FriendlyByteBuf buf) {
-                return new SelectPetPacket(
-                    buf.readUUID(),
-                    buf.readUtf(),
-                    buf.readInt(),
-                    buf.readInt(),
-                    buf.readInt(),
-                    buf.readUtf()
-                );
-            }
-
-            @Override
-            public void encode(FriendlyByteBuf buf, SelectPetPacket packet) {
-                buf.writeUUID(packet.petUUID);
-                buf.writeUtf(packet.petName);
-                buf.writeInt(packet.x);
-                buf.writeInt(packet.y);
-                buf.writeInt(packet.z);
-                buf.writeUtf(packet.dimension);
-            }
-        };
-
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public SelectPetPacket(UUID petUUID, String petName, int x, int y, int z, String dimension) {
+        this.petUUID = petUUID;
+        this.petName = petName;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.dimension = dimension;
     }
 
-    public static void handle(SelectPetPacket packet, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (context.player() instanceof ServerPlayer serverPlayer) {
+    public static void encode(SelectPetPacket packet, FriendlyByteBuf buf) {
+        buf.writeUUID(packet.petUUID);
+        buf.writeUtf(packet.petName);
+        buf.writeInt(packet.x);
+        buf.writeInt(packet.y);
+        buf.writeInt(packet.z);
+        buf.writeUtf(packet.dimension);
+    }
+
+    public static SelectPetPacket decode(FriendlyByteBuf buf) {
+        return new SelectPetPacket(
+            buf.readUUID(),
+            buf.readUtf(),
+            buf.readInt(),
+            buf.readInt(),
+            buf.readInt(),
+            buf.readUtf()
+        );
+    }
+
+    public static void handle(SelectPetPacket packet, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer serverPlayer = ctx.get().getSender();
+            if (serverPlayer != null) {
                 // Find the compass in player's hand
                 ItemStack stack = serverPlayer.getItemInHand(InteractionHand.MAIN_HAND);
                 if (!(stack.getItem() instanceof PetCompassItem)) {
@@ -115,18 +109,22 @@ public record SelectPetPacket(
                     PetCompassItem.setInitialDistance(stack, distance);
                     
                     // Send update to client
-                    PacketDistributor.sendToPlayer(serverPlayer, new UpdateCompassPacket(
-                        packet.petUUID.toString(),
-                        petName,
-                        targetX,
-                        targetY,
-                        targetZ,
-                        distance,
-                        true,
-                        targetDimension
-                    ));
+                    PetCompassNetworking.CHANNEL.send(
+                        PacketDistributor.PLAYER.with(() -> serverPlayer),
+                        new UpdateCompassPacket(
+                            packet.petUUID.toString(),
+                            petName,
+                            targetX,
+                            targetY,
+                            targetZ,
+                            distance,
+                            true,
+                            targetDimension
+                        )
+                    );
                 }
             }
         });
+        ctx.get().setPacketHandled(true);
     }
 }

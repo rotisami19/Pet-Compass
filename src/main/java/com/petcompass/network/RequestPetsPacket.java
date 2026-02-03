@@ -1,36 +1,34 @@
 package com.petcompass.network;
 
-import com.petcompass.PetCompass;
 import com.petcompass.util.PetUtils;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Packet sent from client to server to request the list of tamed pets.
  */
-public record RequestPetsPacket() implements CustomPacketPayload {
+public class RequestPetsPacket {
 
-    public static final CustomPacketPayload.Type<RequestPetsPacket> TYPE = 
-        new CustomPacketPayload.Type<>(PetCompassNetworking.REQUEST_PETS_ID);
-
-    public static final StreamCodec<FriendlyByteBuf, RequestPetsPacket> STREAM_CODEC = 
-        StreamCodec.unit(new RequestPetsPacket());
-
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public RequestPetsPacket() {
     }
 
-    public static void handle(RequestPetsPacket packet, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (context.player() instanceof ServerPlayer serverPlayer) {
+    public static void encode(RequestPetsPacket packet, FriendlyByteBuf buf) {
+        // Nothing to encode
+    }
+
+    public static RequestPetsPacket decode(FriendlyByteBuf buf) {
+        return new RequestPetsPacket();
+    }
+
+    public static void handle(RequestPetsPacket packet, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer serverPlayer = ctx.get().getSender();
+            if (serverPlayer != null) {
                 // Search for pets in a 5000 block radius (configurable)
                 int searchRadius = 5000;
                 List<PetUtils.TamedPetInfo> pets = PetUtils.getTamedPets(
@@ -40,8 +38,12 @@ public record RequestPetsPacket() implements CustomPacketPayload {
                 );
                 
                 // Send the list back to the client
-                PacketDistributor.sendToPlayer(serverPlayer, new SyncPetsPacket(pets));
+                PetCompassNetworking.CHANNEL.send(
+                    PacketDistributor.PLAYER.with(() -> serverPlayer),
+                    new SyncPetsPacket(pets)
+                );
             }
         });
+        ctx.get().setPacketHandled(true);
     }
 }

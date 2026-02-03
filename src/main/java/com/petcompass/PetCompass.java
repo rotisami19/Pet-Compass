@@ -2,37 +2,41 @@ package com.petcompass;
 
 import com.petcompass.advancement.PetCompassTriggers;
 import com.petcompass.network.PetCompassNetworking;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
 @Mod(PetCompass.MODID)
 public class PetCompass {
     public static final String MODID = "petcompass";
     public static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MODID);
     
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     
-    public static final DeferredHolder<Item, PetCompassItem> PET_COMPASS = ITEMS.register("pet_compass", 
+    public static final RegistryObject<PetCompassItem> PET_COMPASS = ITEMS.register("pet_compass", 
         () -> new PetCompassItem(new Item.Properties().stacksTo(1)));
 
-    public PetCompass(IEventBus modEventBus, ModContainer modContainer) {
+    public PetCompass() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        
         ITEMS.register(modEventBus);
-        PetCompassComponents.register(modEventBus);
         PetCompassTriggers.register(modEventBus);
         modEventBus.addListener(this::addCreative);
         
         // Register networking
-        PetCompassNetworking.register(modEventBus);
+        PetCompassNetworking.register();
+        
+        // Register server events
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
-    
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(PET_COMPASS.get());

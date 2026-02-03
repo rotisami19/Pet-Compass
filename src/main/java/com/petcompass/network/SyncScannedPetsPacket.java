@@ -4,33 +4,28 @@ import com.petcompass.PetCompass;
 import com.petcompass.PetCompassClientData;
 import com.petcompass.util.RegionScanner.ScannedPetInfo;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 /**
  * Packet to sync scanned pets (from region files) to the client.
  * This includes pets in unloaded chunks.
  */
-public record SyncScannedPetsPacket(List<ScannedPetInfo> pets) implements CustomPacketPayload {
+public class SyncScannedPetsPacket {
 
-    public static final CustomPacketPayload.Type<SyncScannedPetsPacket> TYPE = 
-        new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(PetCompass.MODID, "sync_scanned_pets"));
+    private final List<ScannedPetInfo> pets;
 
-    public static final StreamCodec<FriendlyByteBuf, SyncScannedPetsPacket> STREAM_CODEC = 
-        StreamCodec.of(SyncScannedPetsPacket::encode, SyncScannedPetsPacket::decode);
-
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public SyncScannedPetsPacket(List<ScannedPetInfo> pets) {
+        this.pets = pets;
     }
 
-    public static void encode(FriendlyByteBuf buf, SyncScannedPetsPacket pkt) {
+    public static void encode(SyncScannedPetsPacket pkt, FriendlyByteBuf buf) {
         buf.writeInt(pkt.pets.size());
         for (ScannedPetInfo pet : pkt.pets) {
             buf.writeUUID(pet.petUUID());
@@ -59,11 +54,14 @@ public record SyncScannedPetsPacket(List<ScannedPetInfo> pets) implements Custom
         return new SyncScannedPetsPacket(pets);
     }
 
-    public static void handle(SyncScannedPetsPacket pkt, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> {
+    public static void handle(SyncScannedPetsPacket pkt, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
             // Store scanned pets in client data
-            PetCompassClientData.setScannedPets(pkt.pets);
-            PetCompass.LOGGER.info("Received {} scanned pets from server", pkt.pets.size());
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+                PetCompassClientData.setScannedPets(pkt.pets);
+                PetCompass.LOGGER.info("Received {} scanned pets from server", pkt.pets.size());
+            });
         });
+        ctx.get().setPacketHandled(true);
     }
 }

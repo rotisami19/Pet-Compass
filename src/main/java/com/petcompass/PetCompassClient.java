@@ -3,18 +3,17 @@ package com.petcompass;
 import com.petcompass.gui.PetCompassHUD;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 /**
  * Client-side setup for Pet Compass.
  */
-@EventBusSubscriber(modid = PetCompass.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = PetCompass.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class PetCompassClient {
 
     @SubscribeEvent
@@ -22,7 +21,7 @@ public class PetCompassClient {
         event.enqueueWork(() -> {
             // Register compass angle property for the needle animation
             ItemProperties.register(PetCompass.PET_COMPASS.get(), 
-                ResourceLocation.withDefaultNamespace("angle"),
+                new ResourceLocation("angle"),
                 (stack, level, entity, seed) -> {
                     if (entity == null || level == null) {
                         return 0.0f;
@@ -52,10 +51,7 @@ public class PetCompassClient {
     }
     
     @SubscribeEvent
-    public static void registerHUD(RegisterGuiLayersEvent event) {
-        event.registerAbove(VanillaGuiLayers.CROSSHAIR, 
-            ResourceLocation.fromNamespaceAndPath(PetCompass.MODID, "pet_compass_hud"),
-            new PetCompassHUD()
-        );
+    public static void registerHUD(RegisterGuiOverlaysEvent event) {
+        event.registerAbove(VanillaGuiOverlay.CROSSHAIR.id(), "pet_compass_hud", new PetCompassHUD());
     }
 }
