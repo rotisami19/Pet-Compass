@@ -1,9 +1,9 @@
 # PetCompass - Test all versions before release
-# Runs a build on each branch (1.20.x NeoForge, 1.20.x Forge, 1.21.x NeoForge)
+# Runs a build on each branch (1.20.x NeoForge, 1.20.x Forge, main/1.21.x NeoForge)
 # Auto-stashes local changes for checkout, then restores at the end.
 
 $ErrorActionPreference = "Stop"
-$branches = @("1.20.x-neoforge", "1.20.x-forge", "1.21.x-neoforge")
+$branches = @("1.20.x-neoforge", "1.20.x-forge", "main")
 $results = @{}
 $startBranch = (git branch --show-current 2>$null)
 $hadStash = $false
