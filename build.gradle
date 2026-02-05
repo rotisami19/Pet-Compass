@@ -99,6 +99,7 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     mainFile.changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : "Version ${mod_version}"
     mainFile.changelogType = 'markdown'
     mainFile.releaseType = 'release' // 'alpha', 'beta', or 'release'
+    mainFile.addGameVersion '1.21'
     mainFile.addGameVersion '1.21.1'
     mainFile.addModLoader 'NeoForge'
 }
