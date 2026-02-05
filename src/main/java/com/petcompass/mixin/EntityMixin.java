@@ -1,7 +1,8 @@
 package com.petcompass.mixin;
 
+import com.petcompass.CompassState;
 import com.petcompass.PetCompass;
-import com.petcompass.PetCompassClientData;
+import com.petcompass.PetCompassItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -15,8 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
 /**
- * Mixin to make the tracked pet glow when player holds the Pet Compass.
- * This intercepts the isCurrentlyGlowing check during rendering.
+ * Mixin to make the tracked pet glow when the local player holds the Pet Compass.
+ * Client-only: only the player holding the compass sees the outline; other players do not.
+ * Intercepts isCurrentlyGlowing during rendering.
  */
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -32,17 +34,20 @@ public abstract class EntityMixin {
         Player player = mc.player;
         if (player == null) return;
         
-        // Check if player is holding the Pet Compass in MAIN hand only
+        // Check main hand and off hand for Pet Compass
         ItemStack mainHand = player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (mainHand.isEmpty() || mainHand.getItem() != PetCompass.PET_COMPASS.get()) {
-            return; // Not holding compass in main hand - no glow
+        ItemStack offHand = player.getItemInHand(InteractionHand.OFF_HAND);
+        ItemStack compassStack = null;
+        if (!mainHand.isEmpty() && mainHand.getItem() == PetCompass.PET_COMPASS.get()) {
+            compassStack = mainHand;
+        } else if (!offHand.isEmpty() && offHand.getItem() == PetCompass.PET_COMPASS.get()) {
+            compassStack = offHand;
         }
+        if (compassStack == null) return;
         
-        // Use client-side data which is updated immediately on reset
-        if (!PetCompassClientData.isTracking) return;
+        if (PetCompassItem.getState(compassStack) != CompassState.FOUND) return;
         
-        // Get targeted pet UUID from client data
-        String petUuidString = PetCompassClientData.petUUID;
+        String petUuidString = PetCompassItem.getPetUUID(compassStack);
         if (petUuidString == null || petUuidString.isEmpty()) return;
         
         try {
