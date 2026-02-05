@@ -133,6 +133,9 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     mainFile.changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : "Version ${mod_version}"
     mainFile.changelogType = 'markdown'
     mainFile.releaseType = 'release'
+    mainFile.addGameVersion '1.20'
     mainFile.addGameVersion '1.20.1'
+    mainFile.addGameVersion '1.20.2'
+    mainFile.addGameVersion '1.20.4'
     mainFile.addModLoader 'Forge'
 }
