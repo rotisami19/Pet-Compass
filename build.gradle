@@ -12,6 +12,7 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven {
         url "https://maven.neoforged.net/releases/"
     }
@@ -79,11 +80,20 @@ tasks.withType(JavaCompile).configureEach {
 
 task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     // Get API key from environment variable (never commit the key!)
-    apiToken = System.getenv('CURSEFORGE_API_KEY') ?: 'missing_api_key'
+    def curseforgeApiToken = System.getenv('CURSEFORGE_API_KEY')
+    apiToken = curseforgeApiToken ?: 'missing_api_key'
     
     // Your CurseForge project ID (get it from your project URL)
     // Example: https://www.curseforge.com/minecraft/mc-mods/pet-compass -> Project ID shown in "About Project"
     def projectId = System.getenv('CURSEFORGE_PROJECT_ID') ?: '0'
+    doFirst {
+        if (!curseforgeApiToken || curseforgeApiToken.trim().isEmpty()) {
+            throw new GradleException("Missing CURSEFORGE_API_KEY environment variable")
+        }
+        if (!projectId || projectId.trim().isEmpty() || projectId == '0') {
+            throw new GradleException("Missing CURSEFORGE_PROJECT_ID environment variable")
+        }
+    }
     
     def mainFile = upload(projectId, jar)
     mainFile.changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : "Version ${mod_version}"
