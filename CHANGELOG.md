@@ -1,12 +1,12 @@
-# Changelog
+﻿# Changelog
 
 ## v1.1.0
-- Compatible avec Forge 1.20.1 et NeoForge 1.20.1 / 1.21.1 (fichiers séparés)
-- **Region Scanner**: retrouve les pets dans des chunks non chargés (scan des fichiers monde)
-- **Cross-Dimension Tracking**: suit les pets dans Nether/End/dimensions modées
-- **Dimension Display**: la GUI affiche la dimension du pet (avec codes couleur)
-- **Fixed**: crash lié aux advancements sur le tick joueur
-- **Improved**: filtrage des entités pour éviter les faux positifs
+- Compatible with Forge 1.20.1 and NeoForge 1.20.1 / 1.21.1 (separate files)
+- **Region Scanner**: Find pets in unloaded chunks (world file scanning)
+- **Cross-Dimension Tracking**: Track pets in Nether/End/modded dimensions
+- **Dimension Display**: GUI shows pet's dimension (with color codes)
+- **Fixed**: Crash related to advancements on player tick
+- **Improved**: Entity filtering to avoid false positives
 
 ## v1.0.0 - Initial Release
 - Pet Compass item to locate your tamed pets
