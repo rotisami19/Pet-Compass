@@ -108,18 +108,23 @@ tasks.withType(JavaCompile).configureEach {
 // ============================================
 
 task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
-    apiToken = System.getenv('CURSEFORGE_API_KEY') ?: 'missing_api_key'
+    def curseforgeApiToken = System.getenv('CURSEFORGE_API_KEY')
+    apiToken = curseforgeApiToken ?: 'missing_api_key'
     
     def projectId = System.getenv('CURSEFORGE_PROJECT_ID') ?: '0'
+    doFirst {
+        if (!curseforgeApiToken || curseforgeApiToken.trim().isEmpty()) {
+            throw new GradleException("Missing CURSEFORGE_API_KEY environment variable")
+        }
+        if (!projectId || projectId.trim().isEmpty() || projectId == '0') {
+            throw new GradleException("Missing CURSEFORGE_PROJECT_ID environment variable")
+        }
+    }
     
     def mainFile = upload(projectId, jar)
     mainFile.changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : "Version ${mod_version}"
     mainFile.changelogType = 'markdown'
     mainFile.releaseType = 'release'
     mainFile.addGameVersion '1.20.1'
-    mainFile.addGameVersion '1.20.2'
-    mainFile.addGameVersion '1.20.4'
-    mainFile.addGameVersion '1.20.6'
-    mainFile.addGameVersion '1.20'
     mainFile.addModLoader 'NeoForge'
 }
