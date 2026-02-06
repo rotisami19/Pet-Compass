@@ -14,7 +14,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url "https://maven.neoforged.net/releases/"
+        url = "https://maven.neoforged.net/releases/"
     }
     maven {
         // JEI repository
@@ -58,11 +58,11 @@ runs {
 
     server {
         systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
-        programArguments.add('--nogui')
+        arguments.add('--nogui')
     }
-    
+
     data {
-        programArguments.addAll('--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath())
+        arguments.addAll('--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath())
     }
 }
 

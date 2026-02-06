@@ -1,6 +1,7 @@
 package com.petcompass.network;
 
 import com.petcompass.PetCompass;
+import com.petcompass.PetCompassConstants;
 import com.petcompass.PetCompassItem;
 import com.petcompass.util.PetUtils;
 import net.minecraft.network.FriendlyByteBuf;
@@ -72,7 +73,8 @@ public record SelectPetPacket(
                 
                 if (stack.getItem() instanceof PetCompassItem) {
                     // Try to find the pet if it's loaded (for more accurate position)
-                    Entity pet = PetUtils.findPetByUUID(serverPlayer.level(), serverPlayer, packet.petUUID, 200);
+                    Entity pet = PetUtils.findPetByUUID(serverPlayer.level(), serverPlayer, packet.petUUID,
+                        PetCompassConstants.NEARBY_SEARCH_RADIUS);
                     
                     int targetX, targetY, targetZ;
                     String targetDimension;
@@ -108,7 +110,7 @@ public record SelectPetPacket(
                         distance = (int) Math.sqrt(dx * dx + dy * dy + dz * dz);
                     } else {
                         // Cross-dimension: show a large placeholder distance
-                        distance = 99999;
+                        distance = PetCompassConstants.CROSS_DIMENSION_DISTANCE;
                     }
                     
                     PetCompassItem.setDistance(stack, distance);
