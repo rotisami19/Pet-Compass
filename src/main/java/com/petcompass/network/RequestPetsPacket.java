@@ -1,5 +1,6 @@
 package com.petcompass.network;
 
+import com.petcompass.PetCompassConstants;
 import com.petcompass.util.PetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,7 +31,7 @@ public class RequestPetsPacket {
             ServerPlayer serverPlayer = ctx.get().getSender();
             if (serverPlayer != null) {
                 // Search for pets in a 5000 block radius (configurable)
-                int searchRadius = 5000;
+                int searchRadius = PetCompassConstants.DEFAULT_SEARCH_RADIUS;
                 List<PetUtils.TamedPetInfo> pets = PetUtils.getTamedPets(
                     serverPlayer.level(), 
                     serverPlayer, 
