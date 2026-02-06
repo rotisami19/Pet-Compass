@@ -2,6 +2,7 @@ package com.petcompass.event;
 
 import com.petcompass.CompassState;
 import com.petcompass.PetCompass;
+import com.petcompass.PetCompassConstants;
 import com.petcompass.PetCompassItem;
 import com.petcompass.advancement.PetCompassTriggers;
 import com.petcompass.util.PetUtils;
@@ -23,9 +24,7 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = PetCompass.MODID)
 public class ServerAchievementHandler {
 
-    private static final int PROXIMITY_THRESHOLD = 10; // Blocks - how close to be considered "found"
-    private static final int CHECK_INTERVAL = 20; // Check every 20 ticks (1 second)
-    private static final ResourceLocation FIND_LOST_PET_ADVANCEMENT = 
+    private static final ResourceLocation FIND_LOST_PET_ADVANCEMENT =
         new ResourceLocation(PetCompass.MODID, "find_lost_pet");
 
     @SubscribeEvent
@@ -34,9 +33,9 @@ public class ServerAchievementHandler {
         if (event.phase != TickEvent.Phase.END || event.side.isClient()) return;
         
         if (!(event.player instanceof ServerPlayer player)) return;
-        
+
         // Only check every second to reduce performance impact
-        if (player.tickCount % CHECK_INTERVAL != 0) return;
+        if (player.tickCount % PetCompassConstants.ACHIEVEMENT_CHECK_INTERVAL != 0) return;
 
         // Skip if player already has the achievement (performance optimization)
         var advancementHolder = player.server.getAdvancements().getAdvancement(FIND_LOST_PET_ADVANCEMENT);
@@ -54,7 +53,7 @@ public class ServerAchievementHandler {
 
         // Get the initial distance (when pet was selected)
         int initialDistance = PetCompassItem.getInitialDistance(compass);
-        if (initialDistance < 100) return; // Pet wasn't far enough to count
+        if (initialDistance < PetCompassConstants.MINIMUM_DISTANCE_THRESHOLD) return; // Pet wasn't far enough to count
 
         // Get the targeted pet UUID
         String petUuidString = PetCompassItem.getPetUUID(compass);
@@ -62,14 +61,14 @@ public class ServerAchievementHandler {
 
         try {
             UUID petUUID = UUID.fromString(petUuidString);
-            
+
             // Find the pet
-            Entity pet = PetUtils.findPetByUUID(player.level(), player, petUUID, 50);
+            Entity pet = PetUtils.findPetByUUID(player.level(), player, petUUID, PetCompassConstants.ACHIEVEMENT_SEARCH_RADIUS);
             if (pet == null) return;
 
             // Check if player is close enough to the pet
             double currentDistance = player.distanceTo(pet);
-            if (currentDistance <= PROXIMITY_THRESHOLD) {
+            if (currentDistance <= PetCompassConstants.PROXIMITY_THRESHOLD) {
                 // Player found their lost pet! Award the achievement
                 PetCompassTriggers.FIND_LOST_PET.trigger(player, initialDistance);
                 

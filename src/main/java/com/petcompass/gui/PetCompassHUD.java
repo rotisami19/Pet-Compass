@@ -1,6 +1,7 @@
 package com.petcompass.gui;
 
 import com.petcompass.PetCompassClientData;
+import com.petcompass.PetCompassConstants;
 import com.petcompass.PetCompassItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -50,53 +51,53 @@ public class PetCompassHUD implements IGuiOverlay {
         
         // Update blink animation
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastBlinkTime > 500) {
+        if (currentTime - lastBlinkTime > PetCompassConstants.BLINK_INTERVAL_MS) {
             blinkState = !blinkState;
             lastBlinkTime = currentTime;
         }
-        
+
         // Render HUD overlay in top-left corner
-        int x = 10;
-        int y = 10;
-        int bgColor = 0x80000000; // Semi-transparent black
-        int textColor = 0xFFFFFFFF;
-        int accentColor = 0xFF55FF55; // Green
-        int nearbyColor = 0xFFFFFF55; // Yellow
-        int veryCloseColor = 0xFF55FFFF; // Cyan
+        int x = PetCompassConstants.HUD_X;
+        int y = PetCompassConstants.HUD_Y;
+        int bgColor = PetCompassConstants.COLOR_BG_BLACK; // Semi-transparent black
+        int textColor = PetCompassConstants.COLOR_WHITE_ALPHA;
+        int accentColor = PetCompassConstants.COLOR_GREEN; // Green
+        int nearbyColor = PetCompassConstants.COLOR_YELLOW; // Yellow
+        int veryCloseColor = PetCompassConstants.COLOR_CYAN; // Cyan
         
         // Determine if pet is nearby
         boolean isNearby = distance <= NEARBY_DISTANCE;
         boolean isVeryClose = distance <= VERY_CLOSE_DISTANCE;
-        
+
         // Background panel
-        int panelWidth = 150;
-        int panelHeight = isNearby ? 75 : 72;
-        
+        int panelWidth = PetCompassConstants.HUD_PANEL_WIDTH;
+        int panelHeight = isNearby ? PetCompassConstants.HUD_PANEL_HEIGHT_NEARBY : PetCompassConstants.HUD_PANEL_HEIGHT;
+
         // Special background color when very close
         if (isVeryClose && blinkState) {
-            bgColor = 0x8000AA00; // Semi-transparent green
+            bgColor = PetCompassConstants.COLOR_BG_GREEN; // Semi-transparent green
         } else if (isNearby) {
-            bgColor = 0x80333300; // Semi-transparent dark yellow
+            bgColor = PetCompassConstants.COLOR_BG_YELLOW; // Semi-transparent dark yellow
         }
         
         guiGraphics.fill(x, y, x + panelWidth, y + panelHeight, bgColor);
-        
+
         // Title with nearby indicator
         if (isVeryClose) {
             // Blinking "PET FOUND!" when very close
             if (blinkState) {
-                guiGraphics.drawString(mc.font, "§b§l✦ PET FOUND! ✦", x + 5, y + 5, veryCloseColor);
+                guiGraphics.drawString(mc.font, "§b§l✦ PET FOUND! ✦", x + PetCompassConstants.HUD_PADDING, y + PetCompassConstants.HUD_PADDING, veryCloseColor);
             } else {
-                guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.tracking"), x + 5, y + 5, accentColor);
+                guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.tracking"), x + PetCompassConstants.HUD_PADDING, y + PetCompassConstants.HUD_PADDING, accentColor);
             }
         } else if (isNearby) {
-            guiGraphics.drawString(mc.font, "§e§l◆ NEARBY!", x + 5, y + 5, nearbyColor);
+            guiGraphics.drawString(mc.font, "§e§l◆ NEARBY!", x + PetCompassConstants.HUD_PADDING, y + PetCompassConstants.HUD_PADDING, nearbyColor);
         } else {
-            guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.tracking"), x + 5, y + 5, accentColor);
+            guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.tracking"), x + PetCompassConstants.HUD_PADDING, y + PetCompassConstants.HUD_PADDING, accentColor);
         }
-        
+
         // Pet name
-        guiGraphics.drawString(mc.font, PetCompassClientData.petName, x + 5, y + 18, textColor);
+        guiGraphics.drawString(mc.font, PetCompassClientData.petName, x + PetCompassConstants.HUD_PADDING, y + 18, textColor);
         
         // Distance with color based on proximity
         String distanceText = distance + " blocks";
@@ -106,23 +107,23 @@ public class PetCompassHUD implements IGuiOverlay {
         } else if (isNearby) {
             distanceColor = nearbyColor;
         }
-        guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.distance", distanceText), x + 5, y + 30, distanceColor);
-        
+        guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.distance", distanceText), x + PetCompassConstants.HUD_PADDING, y + 30, distanceColor);
+
         // Dimension
         String dimension = PetCompassClientData.dimension;
         String dimensionName = PetCompassItem.getDimensionDisplayName(dimension);
-        guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.dimension", dimensionName), x + 5, y + 42, 0xAAAAFF);
-        
+        guiGraphics.drawString(mc.font, Component.translatable("hud.petcompass.dimension", dimensionName), x + PetCompassConstants.HUD_PADDING, y + 42, PetCompassConstants.COLOR_LIGHT_PURPLE);
+
         // Coordinates
-        String coords = String.format("X:%d Y:%d Z:%d", 
-            PetCompassClientData.targetX, 
-            PetCompassClientData.targetY, 
+        String coords = String.format("X:%d Y:%d Z:%d",
+            PetCompassClientData.targetX,
+            PetCompassClientData.targetY,
             PetCompassClientData.targetZ);
-        guiGraphics.drawString(mc.font, coords, x + 5, y + 54, 0xAAAAAA);
-        
+        guiGraphics.drawString(mc.font, coords, x + PetCompassConstants.HUD_PADDING, y + 54, PetCompassConstants.COLOR_GRAY);
+
         // Draw paw icon when nearby
         if (isNearby) {
-            drawPawIcon(guiGraphics, mc, x + panelWidth - 20, y + 5, isVeryClose, blinkState);
+            drawPawIcon(guiGraphics, mc, x + panelWidth - PetCompassConstants.HUD_PAW_OFFSET, y + PetCompassConstants.HUD_PADDING, isVeryClose, blinkState);
         }
     }
     
@@ -131,13 +132,13 @@ public class PetCompassHUD implements IGuiOverlay {
      */
     private void drawPawIcon(GuiGraphics guiGraphics, Minecraft mc, int x, int y, boolean isVeryClose, boolean blink) {
         int color;
-        
+
         if (isVeryClose) {
-            color = blink ? 0xFF55FFFF : 0xFF00AAAA; // Blinking cyan
+            color = blink ? PetCompassConstants.COLOR_CYAN : PetCompassConstants.COLOR_DARK_CYAN; // Blinking cyan
         } else {
-            color = 0xFFFFFF55; // Yellow
+            color = PetCompassConstants.COLOR_YELLOW; // Yellow
         }
-        
+
         // Draw paw using Unicode (🐾)
         guiGraphics.drawString(mc.font, "🐾", x, y, color);
     }
