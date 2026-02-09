@@ -5,6 +5,7 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.gradle.userdev' version '7.1.20'
     id 'net.darkhax.curseforgegradle' version '1.1.25'
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 version = "${mod_version}"
@@ -99,7 +100,26 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
     mainFile.changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : "Version ${mod_version}"
     mainFile.changelogType = 'markdown'
     mainFile.releaseType = 'release' // 'alpha', 'beta', or 'release'
+    // Add supported versions
     mainFile.addGameVersion '1.21'
     mainFile.addGameVersion '1.21.1'
     mainFile.addModLoader 'NeoForge'
+}
+
+// ============================================
+// Modrinth Upload Configuration
+// ============================================
+// To upload: ./gradlew modrinth
+// Requires: MODRINTH_TOKEN environment variable
+// ============================================
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = System.getenv("MODRINTH_PROJECT_ID")
+    versionNumber = "${mod_version}"
+    versionName = "${mod_name} ${mod_version} (NeoForge 1.21.1)"
+    uploadFile = jar
+    gameVersions = ['1.21', '1.21.1']
+    loaders = ['neoforge']
+    changelog = file('CHANGELOG.md').exists() ? file('CHANGELOG.md').text : "Version ${mod_version}"
 }
