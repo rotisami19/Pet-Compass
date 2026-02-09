@@ -1,5 +1,11 @@
 ﻿# Changelog
 
+## v1.1.1 - Cross-Dimension Fix
+- **Cross-Dimension Pet List**: Pets from all dimensions (Overworld, Nether, End, modded) now appear in the compass GUI
+- **Achievement Fix**: "Find Lost Pet" achievement no longer falsely triggers when traveling through portals to reach a pet in another dimension
+- **Data Pack Fix (1.20.x)**: Fixed advancement and recipe JSON format for Minecraft 1.20.1 compatibility
+- **Hotfix**: Fixed crash related to advancement handler
+
 ## v1.1.0
 - Compatible with Forge 1.20.1 and NeoForge 1.20.1 / 1.21.1 (separate files)
 - **Region Scanner**: Find pets in unloaded chunks (world file scanning)
