@@ -1,6 +1,5 @@
 package com.petcompass.network;
 
-import com.petcompass.PetCompassConstants;
 import com.petcompass.util.PetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,12 +29,10 @@ public class RequestPetsPacket {
         ctx.get().enqueueWork(() -> {
             ServerPlayer serverPlayer = ctx.get().getSender();
             if (serverPlayer != null) {
-                // Search for pets in a 5000 block radius (configurable)
-                int searchRadius = PetCompassConstants.DEFAULT_SEARCH_RADIUS;
-                List<PetUtils.TamedPetInfo> pets = PetUtils.getTamedPets(
-                    serverPlayer.level(), 
-                    serverPlayer, 
-                    searchRadius
+                // Search for pets across ALL dimensions (Overworld, Nether, End, etc.)
+                List<PetUtils.TamedPetInfo> pets = PetUtils.getAllTamedPetsAcrossDimensions(
+                    serverPlayer.getServer(),
+                    serverPlayer
                 );
                 
                 // Send the list back to the client
