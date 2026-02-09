@@ -1,5 +1,4 @@
 {
-    "parent": "minecraft:recipes/root",
     "display": {
         "icon": {
             "item": "petcompass:pet_compass"

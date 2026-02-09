@@ -53,16 +53,14 @@ public class ServerAchievementHandler {
 
         // Get the initial distance (when pet was selected)
         int initialDistance = PetCompassItem.getInitialDistance(compass);
+        PetCompass.LOGGER.debug("[Achievement] Checking... initialDistance={}, threshold={}", initialDistance, PetCompassConstants.MINIMUM_DISTANCE_THRESHOLD);
         if (initialDistance < PetCompassConstants.MINIMUM_DISTANCE_THRESHOLD) return; // Pet wasn't far enough to count
         
         // IMPORTANT: Check if the pet is in the same dimension as the player
-        // The achievement should only trigger for pets that were actually "lost" in the same dimension,
-        // not for pets that were simply in a different dimension
         String petDimension = PetCompassItem.getDimension(compass);
         String playerDimension = player.level().dimension().location().toString();
+        PetCompass.LOGGER.debug("[Achievement] petDimension={}, playerDimension={}", petDimension, playerDimension);
         if (!playerDimension.equals(petDimension)) {
-            // Pet is in a different dimension - don't trigger achievement
-            // The player needs to be in the same dimension as the pet
             return;
         }
 
@@ -75,12 +73,15 @@ public class ServerAchievementHandler {
 
             // Find the pet
             Entity pet = PetUtils.findPetByUUID(player.level(), player, petUUID, PetCompassConstants.ACHIEVEMENT_SEARCH_RADIUS);
+            PetCompass.LOGGER.debug("[Achievement] Pet found? {}", pet != null);
             if (pet == null) return;
 
             // Check if player is close enough to the pet
             double currentDistance = player.distanceTo(pet);
+            PetCompass.LOGGER.debug("[Achievement] currentDistance={}, proximityThreshold={}", currentDistance, PetCompassConstants.PROXIMITY_THRESHOLD);
             if (currentDistance <= PetCompassConstants.PROXIMITY_THRESHOLD) {
                 // Player found their lost pet! Award the achievement
+                PetCompass.LOGGER.info("[Achievement] TRIGGERING find_lost_pet! initialDistance={}", initialDistance);
                 PetCompassTriggers.FIND_LOST_PET.trigger(player, initialDistance);
                 
                 // Reset initial distance to prevent re-triggering
