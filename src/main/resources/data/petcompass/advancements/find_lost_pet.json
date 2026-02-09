@@ -2,7 +2,7 @@
     "parent": "petcompass:craft_compass",
     "display": {
         "icon": {
-            "id": "petcompass:pet_compass"
+            "item": "petcompass:pet_compass"
         },
         "title": {
             "translate": "advancement.petcompass.find_lost_pet.title"

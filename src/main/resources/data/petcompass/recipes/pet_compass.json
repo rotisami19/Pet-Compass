@@ -19,14 +19,14 @@
             "item": "minecraft:compass"
         },
         "F": {
-            "tag": "c:foods/raw_fish"
+            "item": "minecraft:cod"
         },
         "f": {
-            "tag": "c:foods/raw_fish"
+            "item": "minecraft:cod"
         }
     },
     "result": {
-        "id": "petcompass:pet_compass",
+        "item": "petcompass:pet_compass",
         "count": 1
     }
 }
