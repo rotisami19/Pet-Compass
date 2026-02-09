@@ -2,11 +2,8 @@ package com.petcompass;
 
 import java.util.UUID;
 
-import com.petcompass.gui.PetCompassScreen;
-import com.petcompass.network.PetCompassNetworking;
 import com.petcompass.network.RequestPetsPacket;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
