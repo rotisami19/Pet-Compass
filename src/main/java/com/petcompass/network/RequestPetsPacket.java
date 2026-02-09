@@ -1,7 +1,5 @@
 package com.petcompass.network;
 
-import com.petcompass.PetCompass;
-import com.petcompass.PetCompassConstants;
 import com.petcompass.util.PetUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -32,11 +30,10 @@ public record RequestPetsPacket() implements CustomPacketPayload {
     public static void handle(RequestPetsPacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
-                // Search for pets in a configurable block radius
-                List<PetUtils.TamedPetInfo> pets = PetUtils.getTamedPets(
-                    serverPlayer.level(),
-                    serverPlayer,
-                    PetCompassConstants.DEFAULT_SEARCH_RADIUS
+                // Search for pets across ALL dimensions (Overworld, Nether, End, etc.)
+                List<PetUtils.TamedPetInfo> pets = PetUtils.getAllTamedPetsAcrossDimensions(
+                    serverPlayer.getServer(),
+                    serverPlayer
                 );
 
                 // Send the list back to the client

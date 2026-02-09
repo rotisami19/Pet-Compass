@@ -102,19 +102,25 @@ public record SelectPetPacket(
                     
                     // Calculate distance (approximate for cross-dimension)
                     int distance;
+                    int initialDistanceForAchievement;
                     String playerDimension = serverPlayer.level().dimension().location().toString();
                     if (playerDimension.equals(targetDimension)) {
+                        // Same dimension - calculate real distance
                         double dx = serverPlayer.getX() - targetX;
                         double dy = serverPlayer.getY() - targetY;
                         double dz = serverPlayer.getZ() - targetZ;
                         distance = (int) Math.sqrt(dx * dx + dy * dy + dz * dz);
+                        initialDistanceForAchievement = distance; // Can trigger achievement
                     } else {
-                        // Cross-dimension: show a large placeholder distance
+                        // Cross-dimension: show a large placeholder distance for display
                         distance = PetCompassConstants.CROSS_DIMENSION_DISTANCE;
+                        // BUT set initialDistance to 0 to PREVENT achievement trigger
+                        // The achievement should only trigger for pets that were lost in the SAME dimension
+                        initialDistanceForAchievement = 0;
                     }
                     
                     PetCompassItem.setDistance(stack, distance);
-                    PetCompassItem.setInitialDistance(stack, distance);
+                    PetCompassItem.setInitialDistance(stack, initialDistanceForAchievement);
                     
                     // Send update to client
                     PacketDistributor.sendToPlayer(serverPlayer, new UpdateCompassPacket(

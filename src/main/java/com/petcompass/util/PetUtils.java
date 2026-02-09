@@ -1,5 +1,8 @@
 package com.petcompass.util;
 
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -63,6 +66,58 @@ public class PetUtils {
         }
         
         return pets;
+    }
+    
+    /**
+     * Get all tamed entities owned by a player across ALL dimensions.
+     * This searches Overworld, Nether, End, and any modded dimensions.
+     * @param server The Minecraft server
+     * @param player The player owner
+     * @return List of tamed entities belonging to this player across all dimensions
+     */
+    public static List<TamedPetInfo> getAllTamedPetsAcrossDimensions(MinecraftServer server, ServerPlayer player) {
+        List<TamedPetInfo> allPets = new ArrayList<>();
+        UUID playerUUID = player.getUUID();
+        
+        // Iterate through all loaded dimensions
+        for (ServerLevel level : server.getAllLevels()) {
+            // Get all entities in this dimension that belong to the player
+            for (Entity entity : level.getAllEntities()) {
+                if (isOwnedByPlayer(entity, playerUUID)) {
+                    String name = entity.hasCustomName() ? entity.getCustomName().getString() : entity.getType().getDescription().getString();
+                    allPets.add(new TamedPetInfo(
+                        entity.getUUID(),
+                        name,
+                        entity.getType().getDescriptionId(),
+                        (int) entity.getX(),
+                        (int) entity.getY(),
+                        (int) entity.getZ(),
+                        level.dimension().location().toString()
+                    ));
+                }
+            }
+        }
+        
+        return allPets;
+    }
+    
+    /**
+     * Check if an entity is owned by the specified player.
+     */
+    private static boolean isOwnedByPlayer(Entity entity, UUID playerUUID) {
+        // Check if it's a tameable animal that belongs to this player
+        if (entity instanceof TamableAnimal tamable) {
+            return tamable.isTame() && playerUUID.equals(tamable.getOwnerUUID());
+        }
+        // Check for horses and similar
+        if (entity instanceof AbstractHorse horse) {
+            return horse.isTamed() && playerUUID.equals(horse.getOwnerUUID());
+        }
+        // Check for other ownable entities
+        if (entity instanceof OwnableEntity ownable) {
+            return playerUUID.equals(ownable.getOwnerUUID());
+        }
+        return false;
     }
     
     /**
