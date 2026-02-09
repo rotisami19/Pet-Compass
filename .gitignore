@@ -33,3 +33,7 @@ logs/
 
 # Misc
 *.bak
+
+# Ignore tmpclaude and cwd temp files/folders
+tmpclaude*
+*cwd*
