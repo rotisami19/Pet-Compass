@@ -2,7 +2,7 @@
     "parent": "minecraft:recipes/root",
     "display": {
         "icon": {
-            "id": "petcompass:pet_compass"
+            "item": "petcompass:pet_compass"
         },
         "title": {
             "translate": "advancement.petcompass.craft_compass.title"
@@ -21,7 +21,9 @@
             "conditions": {
                 "items": [
                     {
-                        "items": "petcompass:pet_compass"
+                        "items": [
+                            "petcompass:pet_compass"
+                        ]
                     }
                 ]
             }
