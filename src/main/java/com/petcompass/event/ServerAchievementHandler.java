@@ -54,6 +54,17 @@ public class ServerAchievementHandler {
         // Get the initial distance (when pet was selected)
         int initialDistance = PetCompassItem.getInitialDistance(compass);
         if (initialDistance < PetCompassConstants.MINIMUM_DISTANCE_THRESHOLD) return; // Pet wasn't far enough to count
+        
+        // IMPORTANT: Check if the pet is in the same dimension as the player
+        // The achievement should only trigger for pets that were actually "lost" in the same dimension,
+        // not for pets that were simply in a different dimension
+        String petDimension = PetCompassItem.getDimension(compass);
+        String playerDimension = player.level().dimension().location().toString();
+        if (!playerDimension.equals(petDimension)) {
+            // Pet is in a different dimension - don't trigger achievement
+            // The player needs to be in the same dimension as the pet
+            return;
+        }
 
         // Get the targeted pet UUID
         String petUuidString = PetCompassItem.getPetUUID(compass);
