@@ -10,6 +10,7 @@ import net.minecraft.world.level.ChunkPos;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import net.minecraft.nbt.NbtAccounter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -151,6 +152,9 @@ public class RegionScanner {
         }
     }
 
+    // Maximum size for decompressed chunk data (8MB) to prevent zip bombs
+    private static final long MAX_DECOMPRESSED_CHUNK_SIZE = 8 * 1024 * 1024;
+
     /**
      * Scans a single region file for tamed pets using raw file I/O.
      */
@@ -199,7 +203,11 @@ public class RegionScanner {
                         is = new InflaterInputStream(is);
                     }
                     
-                    CompoundTag chunkNBT = NbtIo.read(new DataInputStream(is));
+                    // Wrap with size limiter to prevent zip bombs
+                    is = new LimitedInputStream(is, MAX_DECOMPRESSED_CHUNK_SIZE);
+
+                    // Use NbtAccounter for extra safety if supported
+                    CompoundTag chunkNBT = NbtIo.read(new DataInputStream(is), NbtAccounter.create(MAX_DECOMPRESSED_CHUNK_SIZE));
                     if (chunkNBT == null) continue;
                     
                     // Entity data is in "Entities" list
@@ -374,6 +382,54 @@ public class RegionScanner {
                type.contains("cat") ||
                type.contains("horse") ||
                type.contains("dog");
+    }
+
+    /**
+     * An InputStream that limits the number of bytes that can be read.
+     * Used to prevent Zip Bomb / Memory Exhaustion attacks.
+     */
+    public static class LimitedInputStream extends FilterInputStream {
+        private final long maxBytes;
+        private long bytesRead = 0;
+
+        public LimitedInputStream(InputStream in, long maxBytes) {
+            super(in);
+            this.maxBytes = maxBytes;
+        }
+
+        @Override
+        public int read() throws IOException {
+            int result = super.read();
+            if (result != -1) {
+                updateBytesRead(1);
+            }
+            return result;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int result = super.read(b, off, len);
+            if (result != -1) {
+                updateBytesRead(result);
+            }
+            return result;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long skipped = super.skip(n);
+            if (skipped > 0) {
+                updateBytesRead((int) Math.min(Integer.MAX_VALUE, skipped));
+            }
+            return skipped;
+        }
+
+        private void updateBytesRead(int n) throws IOException {
+            bytesRead += n;
+            if (bytesRead > maxBytes) {
+                throw new IOException("Zip bomb detected! Decompressed data exceeds limit of " + maxBytes + " bytes.");
+            }
+        }
     }
 }
 
